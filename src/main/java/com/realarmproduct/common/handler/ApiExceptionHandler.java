@@ -1,7 +1,8 @@
 package com.realarmproduct.common.handler;
 
-import com.reviewproject.common.ErrorResponse;
-import com.reviewproject.common.exception.CustomException;
+
+import com.realarmproduct.common.ErrorResponse;
+import com.realarmproduct.common.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

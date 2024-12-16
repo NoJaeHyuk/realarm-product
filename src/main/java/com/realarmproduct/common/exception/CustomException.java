@@ -1,6 +1,7 @@
 package com.realarmproduct.common.exception;
 
-import com.reviewproject.constant.ErrorCode;
+
+import com.realarmproduct.common.constant.ErrorCode;
 import lombok.Getter;
 
 @Getter

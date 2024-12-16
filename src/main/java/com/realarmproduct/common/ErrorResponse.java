@@ -1,7 +1,7 @@
 package com.realarmproduct.common;
 
-import com.reviewproject.common.exception.CustomException;
-import com.reviewproject.constant.ErrorCode;
+import com.realarmproduct.common.constant.ErrorCode;
+import com.realarmproduct.common.exception.CustomException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
