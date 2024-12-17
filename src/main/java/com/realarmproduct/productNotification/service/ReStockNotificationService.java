@@ -73,4 +73,50 @@ public class ReStockNotificationService {
         }
     }
 
+    public void resendReStockNotifications(Long productId) {
+        Product product = notificationRepository.findProductById(productId);
+
+        if (product.isOutOfStock()) {
+            throw new IllegalStateException("재고가 없는 상품입니다.");
+        }
+
+        ProductNotificationHistory history = notificationRepository.findLatestNotificationHistory(productId)
+                .orElseThrow(() -> new IllegalStateException("재입고 알림 기록이 존재하지 않습니다."));
+
+        if (history.getNotificationStatus() == NotificationStatus.COMPLETED) {
+            throw new IllegalStateException("이미 모든 알림이 성공적으로 전송되었습니다.");
+        }
+
+        Long lastSentUserId = history.getLastSentUserId();
+        List<ProductUserNotification> users = notificationRepository.findAllActiveUserNotificationsAfterUserId(productId, lastSentUserId);
+
+        try {
+            for (ProductUserNotification user : users) {
+                if (product.isOutOfStock()) {
+                    history.changeStatus(NotificationStatus.CANCELED_BY_SOLD_OUT, user.getUserId());
+                    notificationRepository.saveNotificationHistory(history);
+                    return;
+                }
+
+                alarmSender.notify(user.getUserId(), productId, product.getRestockRound());
+
+                ProductUserNotificationHistory userHistory = new ProductUserNotificationHistory(
+                        productId, user.getUserId(), product.getRestockRound());
+                notificationRepository.saveUserNotificationHistory(userHistory);
+
+                history.changeStatus(NotificationStatus.IN_PROGRESS, user.getUserId());
+                notificationRepository.saveNotificationHistory(history);
+
+                Thread.sleep(2); // 2ms 대기
+            }
+
+            history.changeStatus(NotificationStatus.COMPLETED, null);
+            notificationRepository.saveNotificationHistory(history);
+
+        } catch (Exception e) {
+            history.changeStatus(NotificationStatus.CANCELED_BY_ERROR, null);
+            notificationRepository.saveNotificationHistory(history);
+            throw new RuntimeException("알림 재전송 중 오류 발생", e);
+        }
+    }
 }

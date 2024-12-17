@@ -11,6 +11,13 @@ public class ProductNotificationHistory {
     private NotificationStatus notificationStatus;
     private Long lastSentUserId;
 
+    public ProductNotificationHistory(Long productId, Integer restockRound, NotificationStatus notificationStatus, Long lastSentUserId) {
+        this.productId = productId;
+        this.restockRound = restockRound;
+        this.notificationStatus = notificationStatus;
+        this.lastSentUserId = lastSentUserId;
+    }
+
     public ProductNotificationHistory(Long productId, Integer restockRound) {
         this.productId = productId;
         this.restockRound = restockRound;

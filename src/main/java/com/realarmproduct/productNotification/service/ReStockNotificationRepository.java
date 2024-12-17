@@ -7,6 +7,7 @@ import com.realarmproduct.productNotification.domain.ProductUserNotification;
 import com.realarmproduct.productNotification.domain.ProductUserNotificationHistory;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReStockNotificationRepository {
     Product findProductById(Long productId);
@@ -19,5 +20,7 @@ public interface ReStockNotificationRepository {
 
     void saveUserNotificationHistory(ProductUserNotificationHistory history);
 
-    void updateNotificationHistoryStatus(Long productId, Integer restockRound, NotificationStatus status, Long lastUserId);
+    Optional<ProductNotificationHistory> findLatestNotificationHistory(Long productId);
+
+    List<ProductUserNotification> findAllActiveUserNotificationsAfterUserId(Long productId, Long lastSentUserId);
 }

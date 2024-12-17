@@ -16,6 +16,13 @@ public class NotificationController {
 
     @PostMapping("/products/{productId}/notifications/re-stock")
     public ResponseEntity<Void> reStock(@Min(1) @PathVariable Long productId) {
+        reStockNotificationService.sendReStockNotifications(productId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/admin/{productId}/notifications/re-stock")
+    public ResponseEntity<Void> resendReStockNotifications(@PathVariable Long productId) {
+        reStockNotificationService.resendReStockNotifications(productId);
         return ResponseEntity.ok().build();
     }
 }

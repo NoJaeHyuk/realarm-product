@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -67,11 +68,27 @@ public class ReStockNotificationRepositoryImpl implements ReStockNotificationRep
         userHistoryRepository.save(entity);
     }
 
+
     @Override
-    @Transactional
-    public void updateNotificationHistoryStatus(Long productId, Integer restockRound, NotificationStatus status, Long lastUserId) {
-        ProductNotificationHistoryEntity entity = historyRepository.findByProduct_ProductIdAndRestockRound(productId, restockRound);
-        entity.changeStatus(status, lastUserId);
+    public Optional<ProductNotificationHistory> findLatestNotificationHistory(Long productId) {
+        return historyRepository.findFirstByProduct_ProductIdOrderByIdDesc(productId)
+                .map(entity -> new ProductNotificationHistory(
+                        productId,
+                        entity.getRestockRound(),
+                        entity.getNotificationStatus(),
+                        entity.getLastSentUserId()
+                ));
+    }
+
+    @Override
+    public List<ProductUserNotification> findAllActiveUserNotificationsAfterUserId(Long productId, Long lastSentUserId) {
+        List<ProductUserNotificationEntity> entities =
+                userNotificationRepository.findAllByProduct_ProductIdAndIsActiveTrueAndUserIdGreaterThanOrderByUserIdAsc(
+                        productId, lastSentUserId);
+
+        return entities.stream()
+                .map(entity -> new ProductUserNotification(entity.getProduct().getProductId(), entity.getUserId(), entity.getIsActive()))
+                .collect(Collectors.toList());
     }
 
 }
