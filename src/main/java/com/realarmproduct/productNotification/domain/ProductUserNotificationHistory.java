@@ -6,10 +6,10 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ProductUserNotificationHistory {
-    private Long productId;
-    private Long userId;
-    private Integer restockRound;
-    private LocalDateTime sentAt;
+    private final Long productId;
+    private final Long userId;
+    private final Integer restockRound;
+    private final LocalDateTime sentAt;
 
     public ProductUserNotificationHistory(Long productId, Long userId, Integer restockRound) {
         this.productId = productId;

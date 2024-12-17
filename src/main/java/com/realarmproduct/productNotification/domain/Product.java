@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Getter
 public class Product {
-    private Long productId;
+    private final Long productId;
     private Integer restockRound;
-    private StockStatus stockStatus;
+    private final StockStatus stockStatus;
 
     public Product(Long productId, Integer restockRound, StockStatus stockStatus) {
         this.productId = productId;
@@ -21,5 +21,9 @@ public class Product {
 
     public boolean isOutOfStock() {
         return this.stockStatus == StockStatus.OUT_OF_STOCK;
+    }
+
+    public boolean isInStock() {
+        return this.stockStatus == StockStatus.IN_STOCK;
     }
 }

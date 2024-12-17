@@ -1,7 +1,6 @@
 package com.realarmproduct.productNotification.service;
 
 import com.realarmproduct.common.enums.NotificationStatus;
-import com.realarmproduct.common.enums.StockStatus;
 import com.realarmproduct.productNotification.domain.Product;
 import com.realarmproduct.productNotification.domain.ProductNotificationHistory;
 import com.realarmproduct.productNotification.domain.ProductUserNotification;
@@ -23,41 +22,53 @@ public class ReStockNotificationService {
     @Transactional
     public void sendReStockNotifications(Long productId) {
         Product product = notificationRepository.findProductById(productId);
-        if (product.getStockStatus() == StockStatus.IN_STOCK) {
+
+        if (product.isInStock()) {
             throw new IllegalStateException("이미 재고가 있는 상품입니다.");
         }
 
         product.incrementRestockRound();
         notificationRepository.saveProduct(product);
 
-        ProductNotificationHistory history = new ProductNotificationHistory(productId, product.getRestockRound(), NotificationStatus.IN_PROGRESS, null);
+        ProductNotificationHistory history = new ProductNotificationHistory(productId, product.getRestockRound());
         notificationRepository.saveNotificationHistory(history);
 
         try {
             List<ProductUserNotification> users = notificationRepository.findAllActiveUserNotifications(productId);
 
-            // 500개씩 나누어 배치 처리
             for (int start = 0; start < users.size(); start += BATCH_SIZE) {
                 int end = Math.min(start + BATCH_SIZE, users.size());
                 List<ProductUserNotification> batch = users.subList(start, end);
 
                 for (ProductUserNotification user : batch) {
-                    if (product.getStockStatus() == StockStatus.IN_STOCK) {
-                        notificationRepository.updateNotificationHistoryStatus(productId, product.getRestockRound(), NotificationStatus.CANCELED_BY_SOLD_OUT, user.getUserId());
+                    if (product.isInStock()) {
+                        history.changeStatus(NotificationStatus.CANCELED_BY_SOLD_OUT, user.getUserId());
+                        notificationRepository.saveNotificationHistory(history);
                         return;
                     }
 
+                    // 알림 전송
                     alarmSender.notify(user.getUserId(), productId, product.getRestockRound());
-                    ProductUserNotificationHistory userHistory = new ProductUserNotificationHistory(productId, user.getUserId(), product.getRestockRound());
+
+                    // 알림 히스토리 저장
+                    ProductUserNotificationHistory userHistory = new ProductUserNotificationHistory(
+                            productId, user.getUserId(), product.getRestockRound());
                     notificationRepository.saveUserNotificationHistory(userHistory);
-                    notificationRepository.updateNotificationHistoryStatus(productId, product.getRestockRound(), NotificationStatus.IN_PROGRESS, user.getUserId());
-                    Thread.sleep(2); // 2ms 대기
+
+                    // 진행 상태 업데이트
+                    history.changeStatus(NotificationStatus.IN_PROGRESS, user.getUserId());
+                    notificationRepository.saveNotificationHistory(history);
+
+                    Thread.sleep(2);
                 }
             }
 
-            notificationRepository.updateNotificationHistoryStatus(productId, product.getRestockRound(), NotificationStatus.COMPLETED, null);
+            // 완료 상태 업데이트
+            history.changeStatus(NotificationStatus.COMPLETED, null);
+            notificationRepository.saveNotificationHistory(history);
         } catch (Exception e) {
-            notificationRepository.updateNotificationHistoryStatus(productId, product.getRestockRound(), NotificationStatus.CANCELED_BY_ERROR, null);
+            history.changeStatus(NotificationStatus.CANCELED_BY_ERROR, null);
+            notificationRepository.saveNotificationHistory(history);
             throw new RuntimeException("알림 전송 중 오류 발생", e);
         }
     }

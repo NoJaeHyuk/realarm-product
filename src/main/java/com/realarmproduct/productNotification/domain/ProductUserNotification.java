@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class ProductUserNotification {
-    private Long productId;
-    private Long userId;
-    private Boolean isActive;
+    private final Long productId;
+    private final Long userId;
+    private final Boolean isActive;
 
     public ProductUserNotification(Long productId, Long userId, Boolean isActive) {
         this.productId = productId;
