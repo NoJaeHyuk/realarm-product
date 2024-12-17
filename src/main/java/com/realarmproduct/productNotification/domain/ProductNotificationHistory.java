@@ -18,11 +18,6 @@ public class ProductNotificationHistory {
         this.lastSentUserId = null;
     }
 
-    public void updateStatus(NotificationStatus status, Long lastSentUserId) {
-        this.notificationStatus = status;
-        this.lastSentUserId = lastSentUserId;
-    }
-
     public void changeStatus(NotificationStatus status, Long userId) {
         this.notificationStatus = status;
 
