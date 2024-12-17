@@ -7,7 +7,7 @@ import lombok.Getter;
 public class Product {
     private final Long productId;
     private Integer restockRound;
-    private final StockStatus stockStatus;
+    private StockStatus stockStatus;
 
     public Product(Long productId, Integer restockRound, StockStatus stockStatus) {
         this.productId = productId;
@@ -21,5 +21,9 @@ public class Product {
 
     public boolean isOutOfStock() {
         return this.stockStatus == StockStatus.OUT_OF_STOCK;
+    }
+
+    public void changeStockStatus (StockStatus stockStatus) {
+        this.stockStatus = stockStatus;
     }
 }
