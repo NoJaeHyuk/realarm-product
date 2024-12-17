@@ -2,8 +2,10 @@ package com.realarmproduct.productNotification.repository.entity;
 
 import com.realarmproduct.common.BaseTimeEntity;
 import com.realarmproduct.common.enums.StockStatus;
+import com.realarmproduct.productNotification.domain.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,4 +22,19 @@ public class ProductEntity extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private StockStatus stockStatus;
+
+    @Builder
+    private ProductEntity(Long productId, Integer restockRound, StockStatus stockStatus) {
+        this.productId = productId;
+        this.restockRound = restockRound;
+        this.stockStatus = stockStatus;
+    }
+
+    public static ProductEntity fromDomain(Product product) {
+        return ProductEntity.builder()
+                .productId(product.getProductId())
+                .restockRound(product.getRestockRound())
+                .stockStatus(product.getStockStatus())
+                .build();
+    }
 }
