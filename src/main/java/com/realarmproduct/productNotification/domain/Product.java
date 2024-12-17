@@ -22,8 +22,4 @@ public class Product {
     public boolean isOutOfStock() {
         return this.stockStatus == StockStatus.OUT_OF_STOCK;
     }
-
-    public boolean isInStock() {
-        return this.stockStatus == StockStatus.IN_STOCK;
-    }
 }

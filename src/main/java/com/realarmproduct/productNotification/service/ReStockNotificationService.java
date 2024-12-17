@@ -23,8 +23,8 @@ public class ReStockNotificationService {
     public void sendReStockNotifications(Long productId) {
         Product product = notificationRepository.findProductById(productId);
 
-        if (product.isInStock()) {
-            throw new IllegalStateException("이미 재고가 있는 상품입니다.");
+        if (product.isOutOfStock()) {
+            throw new IllegalStateException("재고가 없는 상품입니다.");
         }
 
         product.incrementRestockRound();
@@ -41,7 +41,7 @@ public class ReStockNotificationService {
                 List<ProductUserNotification> batch = users.subList(start, end);
 
                 for (ProductUserNotification user : batch) {
-                    if (product.isInStock()) {
+                    if (product.isOutOfStock()) {
                         history.changeStatus(NotificationStatus.CANCELED_BY_SOLD_OUT, user.getUserId());
                         notificationRepository.saveNotificationHistory(history);
                         return;
